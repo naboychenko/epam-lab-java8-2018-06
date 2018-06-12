@@ -49,8 +49,8 @@ public class Exercise2 {
      */
     private static <T> T[] sequentialPrefix(T[] source, BinaryOperator<T> operator) {
         T[] result = source.clone();
-        for (int step = 0; step < Math.log(result.length); step++) {
-            int dist = (int) Math.pow(2, step);
+        for (int step = 0; step < log2(result.length); step++) {
+            int dist = pow(2, step);
             for (int i = result.length - 1; i > dist - 1; i--) {
                 result[i] = operator.apply(result[i], result[i - dist]);
             }
