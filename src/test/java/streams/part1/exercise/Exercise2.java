@@ -5,9 +5,9 @@ import lambda.data.JobHistoryEntry;
 import lambda.data.Person;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 
@@ -18,7 +18,10 @@ public class Exercise2 {
     public void calcAverageAgeOfEmployees() {
         List<Employee> employees = getEmployees();
 
-        Double expected = null;
+        Double expected = employees.stream()
+                .mapToInt(employee -> employee.getPerson().getAge())
+                .average()
+                .getAsDouble();
 
         assertEquals(33.66, expected, 0.1);
     }
@@ -27,7 +30,10 @@ public class Exercise2 {
     public void findPersonWithLongestFullName() {
         List<Employee> employees = getEmployees();
 
-        Person expected = null;
+        Person expected = employees.stream()
+                .map(Employee::getPerson)
+                .max(Comparator.comparingInt(person -> person.getFullName().length()))
+                .get();
 
         assertEquals(expected, employees.get(1).getPerson());
     }
@@ -36,7 +42,14 @@ public class Exercise2 {
     public void findEmployeeWithMaximumDurationAtOnePosition() {
         List<Employee> employees = getEmployees();
 
-        Employee expected = null;
+        Employee expected = employees.stream()
+                .max(Comparator.comparingInt(
+                        employee -> employee.getJobHistory().stream()
+                                .mapToInt(
+                                        JobHistoryEntry::getDuration)
+                                .max()
+                                .getAsInt()))
+                .get();
 
         assertEquals(expected, employees.get(4));
     }
@@ -49,8 +62,18 @@ public class Exercise2 {
     @Test
     public void calcTotalSalaryWithCoefficientWorkExperience() {
         List<Employee> employees = getEmployees();
+        int SALARY = 75_000;
+        double COEFFICIENT = 1.2;
+        int THRESHOLD = 3;
 
-        Double expected = null;
+        Double expected = employees.stream()
+                .map(Employee::getJobHistory)
+                .mapToDouble((entry -> {
+                    int lastDuration = entry.get(entry.size() - 1).getDuration();
+                    return lastDuration > THRESHOLD ? SALARY * COEFFICIENT : SALARY;
+                }
+                ))
+                .sum();
 
         assertEquals(465000.0, expected, 0.001);
     }
